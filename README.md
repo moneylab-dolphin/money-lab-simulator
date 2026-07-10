@@ -123,7 +123,44 @@ moneylab2026
 
 これをメンバーシップ限定記事に記載してください。
 
-### 合言葉の変え方(月替わり運用も可能)
+### 月替わり合言葉の運用(推奨: moneylab+年月 方式)
+
+公開URL: https://moneylab-dolphin.github.io/money-lab-simulator/
+
+毎月の変更はGitHubのブラウザ画面だけで完結します(所要1分):
+
+1. リポジトリの `js` フォルダ → `app.js` を開き、鉛筆アイコン(Edit this file)をクリック
+2. 上のほうにある `const PASS_HASH = '...'` の値を、下表の新しい月のハッシュに貼り替える
+3. 緑の「Commit changes」→ そのまま確定。約10分以内に全読者へ反映されます
+   (GitHub Pagesのキャッシュは10分なので、合言葉変更だけなら ?v= を上げなくてもOK)
+4. メンバー限定記事に新しい合言葉を書く。旧合言葉で解放済みの読者は自動で再ロックされます
+
+| 対象月 | 合言葉 | PASS_HASH に貼る値 |
+|---|---|---|
+| 2026年7月 | moneylab202607 | b2eb7c1122e375c5e10a678b611d834bb291ab21ef2b49b0a569fa861e3d4b04 |
+| 2026年8月 | moneylab202608 | 395cab08b3a12b8d5625daec1199dce5b4c1eabee9983b7b9b818f98c19d1a9d |
+| 2026年9月 | moneylab202609 | a126eaccb32a3ef4c6c9b35a8900764cd8a49462878f4755ab1ef2c427cf0a83 |
+| 2026年10月 | moneylab202610 | 92eb639de38631dd48356c22e2fb1c51e48239db4fc79a6f6a7e75a795116302 |
+| 2026年11月 | moneylab202611 | 72607257b49ea834d875546dbf5801eff19056db5f4123bddba834d8d95d27e5 |
+| 2026年12月 | moneylab202612 | 75577c73158e4fa29ea47272b506d4d5daa25cf14fc8e0f266cd2006ca89dc98 |
+| 2027年1月 | moneylab202701 | 02b9aca6fc727359ac682b240f8fc21a2908a4cc7454c4c67b660654edff9425 |
+| 2027年2月 | moneylab202702 | 2c790d157e79604fe5199b831790a691f84f2b7a04fb4005ed12619564da5391 |
+| 2027年3月 | moneylab202703 | a85e495d8e46397015b0bea1fc96d9025f64e36163ea1dbc4d11f4e848c8d2ef |
+| 2027年4月 | moneylab202704 | 3e73e4df53eb16d79e1dc1d5a9816b3d4c031e568bf3e1ba3e60530bb484dc36 |
+| 2027年5月 | moneylab202705 | ba774cdf458dc4c99d01fb1c7c4ff4dd47d11c84a0509dafacb664fe6b2f6e84 |
+| 2027年6月 | moneylab202706 | f4d7203fad084108a09d4ed277ebf790edfa723ce408f9fe77232de80e02c02a |
+| 2027年7月 | moneylab202707 | cc301f1851c523e08d7974535836d17b6b6e82176a526b058a3e70d3e52591c2 |
+| 2027年8月 | moneylab202708 | 567ebf7e2be4d6122aeb57c67041b78187a45244d6d06608ed6ce149af79e658 |
+| 2027年9月 | moneylab202709 | 6a19fe8c1532992ca8d08123f4d960c036528365feaff4eef1eaaf980019aee6 |
+| 2027年10月 | moneylab202710 | dd1f701e1bbe0b2874b655ca4ed6010c275ba8015e78a3da1bdc94b5aa378880 |
+| 2027年11月 | moneylab202711 | 21a774acf4ec0a984adca1aa1063432337c2257bb1affea038625e9d065520ed |
+| 2027年12月 | moneylab202712 | 9e581d45eef48e794ec2a0dad881f20fba1c12ecdf456969bab02d71e91c4d43 |
+
+※ この表はハッシュ(復元不可能な指紋)なので、リポジトリに置いても合言葉自体は漏れません。
+※ 年月方式は覚えやすい反面、規則性から推測されやすくなります。「カジュアルな限定」の
+   割り切りとして許容してください。気になる場合は月ごとに無関係な単語にすれば安全性は上がります。
+
+### 合言葉の変え方(任意の言葉にしたい場合)
 
 1. シミュレーターをブラウザで開き、開発者ツールのコンソールで次を実行:
    `await hashPass('新しい合言葉')`
