@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>マネーラボ 資産形成シミュレーター | FIRE・サイドFIRE・老後資金を一目で</title>
+<meta name="description" content="年収・積立額・家族構成・教育費まで自分仕様にカスタマイズできる資産形成シミュレーター。FIRE可能年齢、サイドFIRE、老後の資産寿命、モンテカルロ成功確率まで一目でわかる。">
+<meta property="og:title" content="マネーラボ 資産形成シミュレーター">
+<meta property="og:description" content="FIRE可能年齢・サイドFIRE・老後の資産寿命・教育費の山まで、あなた仕様にシミュレーション。">
+<meta property="og:type" content="website">
+<meta name="theme-color" content="#060b16">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="マネーラボ">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23fbbf24'/%3E%3Cstop offset='1' stop-color='%235eead4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='46' fill='url(%23g)'/%3E%3Ctext x='50' y='68' font-size='52' text-anchor='middle' font-weight='bold' fill='%23060b16'%3E%C2%A5%3C/text%3E%3C/svg%3E">
+<!-- タイトル用の筆文字フォント(書道家・片岡佑二氏の「佑字 墨」)。text=で使用文字だけをサブセット読込 -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Boku&text=%E8%B3%87%E7%94%A3%E5%BD%A2%E6%88%90%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%BF&display=swap">
+<!-- ?v= はキャッシュ対策。ファイルを更新して再デプロイするときは数字を上げる -->
+<link rel="stylesheet" href="css/style.css?v=19">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="bg-orbs"><span class="orb3"></span></div>
+
+<div class="wrap">
+
+  <header class="hero">
+    <span class="brand-pill"><span class="dot"></span>MONEY LAB</span>
+    <h1>資産形成シミュレーター</h1>
+    <p class="sub">スライダーを動かすだけ。あなた仕様の「お金の答え」が、この8つ全部出ます。</p>
+    <div class="hero-chips" aria-label="このシミュレーターでわかること">
+      <button data-goto="main">🔥 何歳でFIREできるか</button>
+      <button data-goto="goal">🎯 目標までの必要積立額</button>
+      <button data-goto="bench">🏆 同年代の中での位置</button>
+      <button data-goto="mc">🎲 FIRE計画の成功確率</button>
+      <button data-goto="main">🌤 サイドFIREなら何歳か</button>
+      <button data-goto="retire">⏳ 資産が何歳までもつか</button>
+      <button data-goto="edu">🎓 教育費の山はいつ来るか</button>
+      <button data-goto="house">🏠 家は買うべきか借りるべきか</button>
+    </div>
+    <span class="member-badge">✦ メンバーシップ完全版</span>
+    <button class="join-badge" onclick="activateTab('join');document.querySelector('.tabs').scrollIntoView({behavior:'smooth'})">✦ 完全版でできることを見る</button>
+  </header>
+
+  <div class="layout">
+
+    <!-- ================= パラメータ ================= -->
+    <aside class="params panel">
+      <h2>あなたの条件</h2>
+
+      <details class="pgroup" open>
+        <summary>👤 基本情報 <span class="chev">›</span></summary>
+        <div class="pbody">
+          <div class="field" data-param="age" data-min="20" data-max="70" data-step="1" data-unit="歳"></div>
+          <div class="field" data-param="takehome" data-min="100" data-max="3000" data-step="10" data-unit="万円/年"></div>
+          <div class="field" data-param="livingCost" data-min="8" data-max="100" data-step="1" data-unit="万円/月"></div>
+        </div>
+      </details>
+
+      <details class="pgroup" open>
+        <summary>💰 資産と積立 <span class="chev">›</span></summary>
+        <div class="pbody">
+          <div class="field" data-param="currentRisk" data-min="0" data-max="20000" data-step="50" data-unit="万円"></div>
+          <div class="field" data-param="currentCash" data-min="0" data-max="10000" data-step="10" data-unit="万円"></div>
+          <div class="field" data-param="monthlyInvest" data-min="0" data-max="100" data-step="0.5" data-unit="万円/月"></div>
+          <div class="field" data-param="nisaUsed" data-min="0" data-max="1800" data-step="10" data-unit="万円"></div>
+        </div>
+      </details>
+
+      <details class="pgroup" open>
+        <summary>🔥 FIRE後の暮らし <span class="chev">›</span></summary>
+        <div class="pbody">
+          <div class="field" data-param="fireCost" data-min="8" data-max="100" data-step="1" data-unit="万円/月"></div>
+          <div class="field" data-param="sideIncome" data-min="0" data-max="50" data-step="1" data-unit="万円/月"></div>
+          <div class="field" data-param="targetFireAge" data-min="30" data-max="75" data-step="1" data-unit="歳"></div>
+        </div>
+      </details>
+
+      <details class="pgroup">
+        <summary>📈 市場の前提 <span class="chev">›</span></summary>
+        <div class="pbody">
+          <div class="field" data-param="annualReturn" data-min="0" data-max="10" data-step="0.5" data-unit="%"></div>
+          <div class="preset-row" data-target="annualReturn">
+            <button data-val="0.3">預金メイン 0.3%</button>
+            <button data-val="4">8資産分散型 4%</button>
+            <button data-val="6">全世界株(オルカン) 6%</button>
+            <button data-val="8">米国株(S&amp;P500) 8%</button>
+          </div>
+          <p class="preset-note">参考: S&amp;P500は過去30年で年率約10%、全世界株は約7〜9%(いずれも円ベースの実績目安)。将来は保証されないため、プリセットはやや控えめの値をセットします。</p>
+          <div class="field" data-param="inflation" data-min="0" data-max="4" data-step="0.5" data-unit="%"></div>
+          <div class="preset-row" data-target="inflation">
+            <button data-val="0.5">過去30年平均 0.5%</button>
+            <button data-val="2">日銀目標 2%</button>
+            <button data-val="2.5">直近実績 2.5%</button>
+          </div>
+          <p class="preset-note">参考: 2024年の消費者物価上昇率は総合+2.7%(総務省)。日本銀行は中長期の物価目標を2%としています。デフレ期を含む過去30年の平均は約0.5%です。</p>
+        </div>
+      </details>
+
+      <details class="pgroup" id="familyGroup">
+        <summary>👨‍👩‍👧 家族と教育 <span class="lock-chip">メンバー限定</span><span class="chev">›</span></summary>
+        <div class="pbody">
+          <fieldset class="premium-zone" disabled>
+            <div style="display:grid;gap:16px">
+              <div class="field" data-param="spouseTakehome" data-min="0" data-max="1500" data-step="10" data-unit="万円/年"></div>
+              <div id="childrenList" style="display:grid;gap:10px"></div>
+              <button type="button" class="add-child" id="addChildBtn">＋ 子どもを追加</button>
+            </div>
+          </fieldset>
+        </div>
+      </details>
+
+      <details class="pgroup">
+        <summary>🏖 老後の詳細 <span class="lock-chip">メンバー限定</span><span class="chev">›</span></summary>
+        <div class="pbody">
+          <fieldset class="premium-zone" disabled>
+            <div style="display:grid;gap:16px">
+              <div class="field" data-param="pensionStart" data-min="60" data-max="75" data-step="1" data-unit="歳"></div>
+              <div class="field" data-param="pensionMonthly" data-min="0" data-max="40" data-step="1" data-unit="万円/月"></div>
+              <div class="field" data-param="retirementPay" data-min="0" data-max="5000" data-step="100" data-unit="万円"></div>
+              <div class="field" data-param="salaryGrowth" data-min="0" data-max="5" data-step="0.5" data-unit="%/年"></div>
+              <div class="field" data-param="volatility" data-min="5" data-max="30" data-step="1" data-unit="%"></div>
+            </div>
+          </fieldset>
+        </div>
+      </details>
+    </aside>
+
+    <!-- ================= 結果 ================= -->
+    <main class="results">
+
+      <section class="stats" aria-label="主要な結果">
+        <div class="stat" id="statFire">
+          <div class="k">🔥 FIRE可能年齢</div>
+          <div class="v">--</div>
+          <div class="note">完全リタイアしても100歳まで資産がもつ最早年齢</div>
+        </div>
+        <div class="stat" id="statSideFire">
+          <div class="k">🌤 サイドFIRE可能年齢</div>
+          <div class="v">--</div>
+          <div class="note">副収入を得ながらのセミリタイア</div>
+        </div>
+        <div class="stat" id="statNeed">
+          <div class="k">🎯 FIRE時に必要な資産</div>
+          <div class="v">--</div>
+          <div class="note">FIRE可能年齢時点の金融資産</div>
+        </div>
+        <div class="stat" id="statLife">
+          <div class="k">⏳ 資産寿命</div>
+          <div class="v">--</div>
+          <div class="note">左の「リタイア想定年齢」でリタイアした場合</div>
+        </div>
+      </section>
+
+      <nav class="tabs" role="tablist">
+        <button data-tab="main" class="active">📊 資産推移</button>
+        <button data-tab="goal">🎯 逆算</button>
+        <button data-tab="bench">🏆 同年代比較</button>
+        <button data-tab="rx">💊 処方箋</button>
+        <button data-tab="mc">🎲 成功確率<span class="mini-lock">🔒</span></button>
+        <button data-tab="edu">🎓 教育費の山<span class="mini-lock">🔒</span></button>
+        <button data-tab="retire">🏖 老後・取り崩し<span class="mini-lock">🔒</span></button>
+        <button data-tab="house">🏠 購入 vs 賃貸<span class="mini-lock">🔒</span></button>
+        <button data-tab="join" class="join-tab">✦ 完全版</button>
+      </nav>
+
+      <!-- 資産推移(無料) -->
+      <section class="tab-pane active panel chart-card" id="pane-main">
+        <h3>資産推移シミュレーション</h3>
+        <p class="desc">リタイア想定年齢(左パネル「FIRE後の暮らし」)でリタイアした場合の金融資産の推移。</p>
+        <div class="toggle-row" id="mainToggle">
+          <button data-mode="nominal" class="on">名目(額面)</button>
+          <button data-mode="real">実質(今のお金の価値)</button>
+        </div>
+        <div class="chart-box"><canvas id="chartMain"></canvas></div>
+
+        <!-- 新NISA消化率メーター -->
+        <div class="nisa-box" id="nisaBox">
+          <div class="nisa-head">
+            <span class="nisa-title">🌱 新NISA 生涯投資枠(1,800万円)の消化率</span>
+            <span class="nisa-pct" id="nisaPct">--%</span>
+          </div>
+          <div class="nisa-meter"><div class="fill" id="nisaFill" style="width:0%"></div></div>
+          <div class="sub-stats" id="nisaStats" style="margin:12px 0 0"></div>
+          <p class="preset-note" id="nisaNote" style="margin-top:8px"></p>
+        </div>
+      </section>
+
+      <!-- 処方箋(無料・記事回遊) -->
+      <section class="tab-pane panel chart-card" id="pane-rx">
+        <h3>あなたへの処方箋</h3>
+        <p class="desc">いまの設定から自動診断。気になる項目から関連記事へどうぞ。スライダーを動かすと処方箋も変わります。</p>
+        <div id="rxList" class="rx-list"></div>
+      </section>
+
+      <!-- 逆算(無料+答えのみ限定) -->
+      <section class="tab-pane panel chart-card" id="pane-goal">
+        <h3>目標からの逆算：毎月いくら積み立てればいいか</h3>
+        <p class="desc">「何歳でリタイアしたいか」から、100歳まで資産が尽きないために必要な毎月の積立額を逆算します。</p>
+        <div class="toggle-row" id="goalMode">
+          <button data-side="0" class="on">完全FIRE</button>
+          <button data-side="1">サイドFIRE(副収入あり)</button>
+        </div>
+        <div class="field" style="max-width:420px;margin-bottom:16px" data-param="goalAge" data-min="35" data-max="70" data-step="1" data-unit="歳"></div>
+        <div class="gate">
+          <div class="gate-content">
+            <div class="mc-hero" style="padding-bottom:8px">
+              <div class="cap" id="goalCap">この年齢でリタイアするために必要な毎月の積立額</div>
+              <div class="pct" id="goalAnswer">--</div>
+              <div class="cap" id="goalDelta"></div>
+            </div>
+            <div class="chart-box" style="height:300px"><canvas id="chartGoal"></canvas></div>
+            <p class="desc" style="margin-top:8px">リタイア年齢を1年ずらすと必要積立額がどう変わるかの曲線。ゴールの置き方ひとつで毎月の負担は大きく変わります。</p>
+          </div>
+          <div class="gate-cover">
+            <p><strong>答えはメンバーシップ限定</strong><br>計算は完了しています。合言葉を入力すると必要積立額と曲線が表示されます。</p>
+            <button class="unlock-btn" onclick="openUnlock()">🔑 合言葉を入力する</button>
+            <a class="join-link" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">まだメンバーでない方は → マネーラボに参加して合言葉を受け取る</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- 同年代比較(無料+上位%のみ限定) -->
+      <section class="tab-pane panel chart-card" id="pane-bench">
+        <h3>同年代ベンチマーク：あなたの立ち位置</h3>
+        <p class="desc">公的調査(J-FLEC「家計の金融行動に関する世論調査」2024年)の年代別データと、あなたの金融資産を比較します。</p>
+        <div class="toggle-row" id="benchType">
+          <button data-type="futari" class="on">二人以上世帯</button>
+          <button data-type="tanshin">単身世帯</button>
+        </div>
+        <div class="bench-bars" id="benchBars"></div>
+        <div class="gate">
+          <div class="gate-content">
+            <div class="mc-hero" style="padding-bottom:8px">
+              <div class="cap" id="benchCap">あなたは同年代の</div>
+              <div class="pct" id="benchAnswer">--</div>
+              <div class="cap">に位置しています(金融資産保有額)</div>
+            </div>
+            <div class="chart-box" style="height:280px"><canvas id="chartBench"></canvas></div>
+            <p class="desc" style="margin-top:8px">同年代の金融資産分布。ハイライトがあなたのいる階級です。</p>
+          </div>
+          <div class="gate-cover">
+            <p><strong>「上位◯%」はメンバーシップ限定</strong><br>合言葉を入力すると、分布の中でのあなたの正確な位置が表示されます。</p>
+            <button class="unlock-btn" onclick="openUnlock()">🔑 合言葉を入力する</button>
+            <a class="join-link" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">まだメンバーでない方は → マネーラボに参加して合言葉を受け取る</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- モンテカルロ -->
+      <section class="tab-pane locked-veil panel chart-card" id="pane-mc">
+        <div class="veil-content">
+          <h3>FIRE成功確率(モンテカルロ・シミュレーション)</h3>
+          <p class="desc">リターンのブレを乱数で1,000回試行。単一の予測線ではなく「確率」で将来を見ます。</p>
+          <div class="mc-hero">
+            <div class="pct" id="mcPct">--%</div>
+            <div class="cap" id="mcCap">リタイア想定年齢でFIREして100歳まで資産がもつ確率</div>
+            <div class="mc-gauge"><div class="fill" id="mcGauge" style="width:0%"></div></div>
+          </div>
+          <div class="chart-box"><canvas id="chartMC"></canvas></div>
+          <div class="chart-legend-row">
+            <span class="li"><span class="sw" style="background:#0ea5a0"></span>中央値</span>
+            <span class="li"><span class="sw" style="background:rgba(14,165,160,.5)"></span>25〜75%レンジ</span>
+            <span class="li"><span class="sw" style="background:rgba(14,165,160,.2)"></span>5〜95%レンジ</span>
+          </div>
+        </div>
+        <div class="veil-overlay">
+          <div class="lock-ico">🔑</div>
+          <p><strong>マネーラボ メンバーシップ限定機能</strong><br>メンバーシップ記事に記載の「合言葉」を入力すると、すべての機能が解放されます。</p>
+          <button class="unlock-btn" onclick="openUnlock()">合言葉を入力する</button>
+          <a class="join-link" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">まだメンバーでない方は → マネーラボに参加して合言葉を受け取る</a>
+        </div>
+      </section>
+
+      <!-- 教育費 -->
+      <section class="tab-pane locked-veil panel chart-card" id="pane-edu">
+        <div class="veil-content">
+          <h3>教育費の山と家計への衝撃</h3>
+          <p class="desc">子どもの進路プラン(公立/私立)ごとの教育費負担を年齢軸で見える化。積立を止めずに越えられるかがひと目でわかります。</p>
+          <div class="sub-stats" id="eduStats"></div>
+          <div class="chart-box"><canvas id="chartEdu"></canvas></div>
+        </div>
+        <div class="veil-overlay">
+          <div class="lock-ico">🔑</div>
+          <p><strong>マネーラボ メンバーシップ限定機能</strong><br>左パネルの「家族と教育」で子どもの人数と進路を設定できます。</p>
+          <button class="unlock-btn" onclick="openUnlock()">合言葉を入力する</button>
+          <a class="join-link" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">まだメンバーでない方は → マネーラボに参加して合言葉を受け取る</a>
+        </div>
+      </section>
+
+      <!-- 老後 -->
+      <section class="tab-pane locked-veil panel chart-card" id="pane-retire">
+        <div class="veil-content">
+          <h3>老後の取り崩しと資産寿命</h3>
+          <p class="desc">年金を織り込んだうえで、リタイア後に資産が何歳までもつか。いわゆる「老後2,000万円問題」をあなたの数字で検証します。</p>
+          <div class="sub-stats" id="retireStats"></div>
+          <div class="chart-box"><canvas id="chartRetire"></canvas></div>
+        </div>
+        <div class="veil-overlay">
+          <div class="lock-ico">🔑</div>
+          <p><strong>マネーラボ メンバーシップ限定機能</strong><br>年金額・受給開始年齢・退職金まで細かくカスタマイズできます。</p>
+          <button class="unlock-btn" onclick="openUnlock()">合言葉を入力する</button>
+          <a class="join-link" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">まだメンバーでない方は → マネーラボに参加して合言葉を受け取る</a>
+        </div>
+      </section>
+
+      <!-- 住宅 -->
+      <section class="tab-pane locked-veil panel chart-card" id="pane-house">
+        <div class="veil-content">
+          <h3>住宅 購入 vs 賃貸</h3>
+          <p class="desc">「持ち家の資産価値 − ローン残債」まで含めた純資産ベースの比較。同じ運用前提でどちらが残るか。</p>
+          <div class="toggle-row" id="houseParams" style="gap:14px; align-items:end;">
+            <div class="field" style="min-width:150px" data-param="h_purchaseAge" data-min="25" data-max="60" data-step="1" data-unit="歳"></div>
+            <div class="field" style="min-width:150px" data-param="h_price" data-min="1000" data-max="15000" data-step="100" data-unit="万円"></div>
+            <div class="field" style="min-width:150px" data-param="h_down" data-min="0" data-max="5000" data-step="50" data-unit="万円"></div>
+            <div class="field" style="min-width:150px" data-param="h_loanRate" data-min="0.3" data-max="3" data-step="0.1" data-unit="%"></div>
+            <div class="field" style="min-width:150px" data-param="h_rentMonthly" data-min="3" data-max="50" data-step="0.5" data-unit="万円/月"></div>
+          </div>
+          <div class="sub-stats" id="houseStats"></div>
+          <div class="chart-box"><canvas id="chartHouse"></canvas></div>
+        </div>
+        <div class="veil-overlay">
+          <div class="lock-ico">🔑</div>
+          <p><strong>マネーラボ メンバーシップ限定機能</strong><br>物件価格・頭金・金利・家賃を入れて人生最大の買い物を検証。</p>
+          <button class="unlock-btn" onclick="openUnlock()">合言葉を入力する</button>
+          <a class="join-link" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">まだメンバーでない方は → マネーラボに参加して合言葉を受け取る</a>
+        </div>
+      </section>
+
+      <!-- 完全版の案内(入会導線) -->
+      <section class="tab-pane panel chart-card" id="pane-join">
+        <div class="join-pitch">
+          <h3>✦ メンバーシップ完全版でできること</h3>
+          <p class="desc">合言葉はマネーラボのメンバーシップ限定記事でお知らせしています。参加して合言葉を入力すると、その場ですべて解放されます。</p>
+          <div class="cmp-grid">
+            <div class="cmp-col">
+              <div class="cmp-head free">いま使える(無料)</div>
+              <ul>
+                <li>資産推移・FIRE / サイドFIRE可能年齢</li>
+                <li>逆算タブの操作(答えは非表示)</li>
+                <li>同年代の平均・中央値との比較</li>
+                <li>処方箋(自動診断)・新NISAメーター</li>
+                <li>背景テーマ・スクリーンセーバー</li>
+                <li>結果画像の保存・設定URLシェア</li>
+              </ul>
+            </div>
+            <div class="cmp-col">
+              <div class="cmp-head full">合言葉で解放(完全版)</div>
+              <ul>
+                <li><strong>逆算の答え</strong>: 目標年齢に必要な毎月積立額+年齢別カーブ</li>
+                <li><strong>同年代の上位◯%</strong>と資産分布グラフ</li>
+                <li><strong>FIRE成功確率</strong>(モンテカルロ1,000回試行)</li>
+                <li><strong>教育費の山</strong>(子ども別・私立医学部の学費まで)</li>
+                <li><strong>老後・取り崩し</strong>と資産寿命の詳細</li>
+                <li><strong>住宅 購入vs賃貸</strong>の純資産比較</li>
+                <li>配偶者・年金・退職金・昇給率などの詳細設定</li>
+              </ul>
+            </div>
+          </div>
+          <ol class="join-steps">
+            <li><span>1</span>マネーラボのメンバーシップに参加する</li>
+            <li><span>2</span>メンバー限定記事で「今月の合言葉」を確認する</li>
+            <li><span>3</span>ここに入力すると、その場ですべて解放</li>
+          </ol>
+          <div class="join-cta">
+            <a class="unlock-btn join-main" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">🚀 マネーラボに参加して合言葉を受け取る</a>
+            <button class="join-sub" onclick="openUnlock()">すでに合言葉を持っている方はこちら</button>
+          </div>
+        </div>
+        <div class="join-thanks">
+          <h3>✦ 完全版をご利用中です</h3>
+          <p class="desc">いつもマネーラボを応援いただきありがとうございます。合言葉は月替わりです。新しい合言葉はメンバーシップ限定記事でお知らせします。</p>
+          <div class="join-cta">
+            <a class="unlock-btn join-main" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">📖 マネーラボの記事を読む</a>
+          </div>
+        </div>
+      </section>
+
+      <div class="action-bar">
+        <button id="snapBtn">📸 結果画像を保存(X投稿用)</button>
+        <button id="shareBtn">🔗 この設定をURLでシェア</button>
+        <button id="resetBtn">↺ 初期値に戻す</button>
+        <button onclick="openUnlock()" id="unlockBarBtn">🔑 合言葉で完全版に</button>
+      </div>
+
+      <footer>
+        <div class="brand">マネーラボ 資産形成シミュレーター</div>
+        <p style="margin-bottom:8px">運営: <a href="https://note.com/dolphin415/membership" target="_blank" rel="noopener" style="color:#5eead4">noteメンバーシップ「マネーラボ」</a> ── 完全版の合言葉はメンバー限定記事でお知らせしています。</p>
+        本シミュレーターは簡易な前提に基づく概算であり、将来の運用成果を保証するものではありません。
+        税金・社会保険料は手取り収入に織り込む形で簡略化しています。
+        教育費は文部科学省「子供の学習費調査」等をもとにした概算値です。
+        投資判断はご自身の責任でお願いします。本ツールは特定の金融商品の勧誘・投資助言ではありません。
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<!-- 合言葉モーダル -->
+<dialog id="unlockModal">
+  <h3>🔑 メンバーシップ完全版</h3>
+  <p>マネーラボのメンバーシップ限定記事に記載されている「合言葉」を入力してください。</p>
+  <input type="text" id="passInput" placeholder="合言葉" autocomplete="off" enterkeyhint="go">
+  <div class="err" id="passErr"></div>
+  <div class="btns">
+    <button onclick="document.getElementById('unlockModal').close()">閉じる</button>
+    <button class="primary" id="passSubmit">解放する</button>
+  </div>
+  <a class="join-link" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">まだメンバーでない方は → マネーラボに参加して合言葉を受け取る</a>
+</dialog>
+
+<div id="toast"></div>
+
+<!-- 背景テーマ切替 -->
+<div id="bgSwitch">
+  <div class="bg-menu" hidden>
+    <button data-bg="space">🌌 深宇宙</button>
+    <button data-bg="nebula">🌠 星雲</button>
+    <button data-bg="water">🌊 水面</button>
+    <button data-bg="land">🏔 風景</button>
+    <button data-bg="shuimo" title="あなたの資産カーブが金の山になります">🖌 金泥山水</button>
+    <button id="ssBtn" style="border-top:1px solid rgba(148,183,255,.14);margin-top:3px;padding-top:8px">🌙 スクリーンセーバー</button>
+  </div>
+  <button id="bgSwitchBtn" title="背景を変える">🎨</button>
+</div>
+<div id="ssHint">クリックで遊べます ・ ダブルクリックか Esc で戻ります</div>
+
+<script src="js/background.js?v=19"></script>
+<script src="js/engine.js?v=19"></script>
+<script src="js/app.js?v=19"></script>
+</body>
+</html>
