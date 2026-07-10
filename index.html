@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Boku&text=%E8%B3%87%E7%94%A3%E5%BD%A2%E6%88%90%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%BF&display=swap">
 <!-- ?v= はキャッシュ対策。ファイルを更新して再デプロイするときは数字を上げる -->
-<link rel="stylesheet" href="css/style.css?v=19">
+<link rel="stylesheet" href="css/style.css?v=20">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -335,7 +335,7 @@
       <section class="tab-pane panel chart-card" id="pane-join">
         <div class="join-pitch">
           <h3>✦ メンバーシップ完全版でできること</h3>
-          <p class="desc">合言葉はマネーラボのメンバーシップ限定記事でお知らせしています。参加して合言葉を入力すると、その場ですべて解放されます。</p>
+          <p class="desc">合言葉はマネーラボのメンバーシップ内の掲示板でお知らせしています。参加して合言葉を入力すると、その場ですべて解放されます。</p>
           <div class="cmp-grid">
             <div class="cmp-col">
               <div class="cmp-head free">いま使える(無料)</div>
@@ -363,7 +363,7 @@
           </div>
           <ol class="join-steps">
             <li><span>1</span>マネーラボのメンバーシップに参加する</li>
-            <li><span>2</span>メンバー限定記事で「今月の合言葉」を確認する</li>
+            <li><span>2</span>メンバーシップ内の掲示板で「最新の合言葉」を確認する</li>
             <li><span>3</span>ここに入力すると、その場ですべて解放</li>
           </ol>
           <div class="join-cta">
@@ -373,7 +373,7 @@
         </div>
         <div class="join-thanks">
           <h3>✦ 完全版をご利用中です</h3>
-          <p class="desc">いつもマネーラボを応援いただきありがとうございます。合言葉は月替わりです。新しい合言葉はメンバーシップ限定記事でお知らせします。</p>
+          <p class="desc">いつもマネーラボを応援いただきありがとうございます。合言葉は不定期に変更しており、変更時はメンバーシップ内の掲示板でお知らせします。</p>
           <div class="join-cta">
             <a class="unlock-btn join-main" href="https://note.com/dolphin415/membership" target="_blank" rel="noopener">📖 マネーラボの記事を読む</a>
           </div>
@@ -389,7 +389,7 @@
 
       <footer>
         <div class="brand">マネーラボ 資産形成シミュレーター</div>
-        <p style="margin-bottom:8px">運営: <a href="https://note.com/dolphin415/membership" target="_blank" rel="noopener" style="color:#5eead4">noteメンバーシップ「マネーラボ」</a> ── 完全版の合言葉はメンバー限定記事でお知らせしています。</p>
+        <p style="margin-bottom:8px">運営: <a href="https://note.com/dolphin415/membership" target="_blank" rel="noopener" style="color:#5eead4">noteメンバーシップ「マネーラボ」</a>。完全版の合言葉はメンバーシップ内の掲示板でお知らせしています。</p>
         本シミュレーターは簡易な前提に基づく概算であり、将来の運用成果を保証するものではありません。
         税金・社会保険料は手取り収入に織り込む形で簡略化しています。
         教育費は文部科学省「子供の学習費調査」等をもとにした概算値です。
@@ -403,7 +403,7 @@
 <!-- 合言葉モーダル -->
 <dialog id="unlockModal">
   <h3>🔑 メンバーシップ完全版</h3>
-  <p>マネーラボのメンバーシップ限定記事に記載されている「合言葉」を入力してください。</p>
+  <p>マネーラボのメンバーシップ内の掲示板でお知らせしている「合言葉」を入力してください。</p>
   <input type="text" id="passInput" placeholder="合言葉" autocomplete="off" enterkeyhint="go">
   <div class="err" id="passErr"></div>
   <div class="btns">
@@ -429,8 +429,8 @@
 </div>
 <div id="ssHint">クリックで遊べます ・ ダブルクリックか Esc で戻ります</div>
 
-<script src="js/background.js?v=19"></script>
-<script src="js/engine.js?v=19"></script>
-<script src="js/app.js?v=19"></script>
+<script src="js/background.js?v=20"></script>
+<script src="js/engine.js?v=20"></script>
+<script src="js/app.js?v=20"></script>
 </body>
 </html>
