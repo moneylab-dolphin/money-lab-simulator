@@ -1226,6 +1226,57 @@ function loadLocal() {
   } catch (e) { /* 破損時は初期値 */ }
 }
 
+/* =============== 訪問カウンター =============== */
+/* counterapi.dev(登録不要・Cookieなし)を利用。同一ブラウザは1日1人として集計。
+   本番ドメイン以外(ローカル確認など)は開発用の別カウンターに記録する。 */
+const VISIT_NS = location.hostname === 'moneylab-dolphin.github.io'
+  ? 'moneylab-dolphin-sim' : 'moneylab-dolphin-sim-dev';
+
+function countUp(el, to) {
+  const fin = () => { el.textContent = to.toLocaleString(); };
+  if (document.hidden) return fin();  // 非表示タブではrAFが動かないため即時反映
+  const dur = 1200, t0 = performance.now();
+  const step = now => {
+    const k = Math.min(1, (now - t0) / dur);
+    const e = 1 - Math.pow(1 - k, 3);
+    el.textContent = Math.round(to * e).toLocaleString();
+    if (k < 1) requestAnimationFrame(step); else clearTimeout(tm);
+  };
+  const tm = setTimeout(fin, dur + 300);  // rAFが途中で止まっても最終値を保証
+  requestAnimationFrame(step);
+}
+
+async function initVisitCounter() {
+  try {
+    const d = new Date();
+    const today = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+    const seenKey = 'ml_v_' + today;
+    let first = true;
+    try {
+      first = !localStorage.getItem(seenKey);
+      /* 過去日の訪問フラグは掃除 */
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('ml_v_') && k !== seenKey) localStorage.removeItem(k);
+      }
+    } catch (e) { /* localStorage不可なら毎回1カウント */ }
+
+    const call = (key, up) =>
+      fetch(`https://api.counterapi.dev/v1/${VISIT_NS}/${key}${up ? '/up' : '/'}`)
+        .then(r => (r.ok ? r.json() : null)).catch(() => null);
+    /* 並列で叩くとnamespace初回作成が競合して400になるため順次呼び出す */
+    const total = await call('total', first);
+    const day = await call('d' + today, first);
+    if (first) { try { localStorage.setItem(seenKey, '1'); } catch (e) {} }
+
+    if (!total || !isFinite(total.count)) return;  // サービス停止時は表示しない
+    $('#visitBadge').hidden = false;
+    countUp($('#vbTotal'), total.count);
+    if (day && isFinite(day.count)) countUp($('#vbToday'), day.count);
+    else $('#vbTodayWrap').hidden = true;
+  } catch (e) { /* オフライン等では黙って非表示のまま */ }
+}
+
 /* =============== 初期化 =============== */
 function init() {
   loadLocal();
@@ -1241,6 +1292,7 @@ function init() {
     renderChildren(); scheduleRecalc();
   });
   initPresets();
+  initVisitCounter();
   $('#snapBtn').addEventListener('click', () => {
     if (!state.last) return;
     drawShareImage();
