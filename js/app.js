@@ -331,6 +331,7 @@ function recalc() {
   }
 
   updateLevers(p, fire);
+  updateFireDash(p, fire, sideFire);
   updateCheckpoint(p, fire);
 
   state.goalDirty = true;
@@ -404,6 +405,67 @@ function updateLevers(p, fire) {
   }
 }
 
+/* =============== FIREタイプ診断と達成率 =============== */
+function diagnoseFireType(p, fire, sideFire) {
+  if (fire && fire.age <= p.age) {
+    return { icon: '👑', name: 'FIRE達成圏',
+      desc: 'いますぐ完全リタイアしても、100歳まで資産がもつ計算です。あとは辞める勇気だけかもしれません。' };
+  }
+  /* Coast判定: 今後いっさい貯蓄を増やさない(積立ゼロ+収入は生活費と同額とみなす)前提で、
+     いまの資産の複利成長だけで65歳までにFIREできるか */
+  const coastAge = fireAgeWith(p, {
+    monthlyInvest: 0,
+    takehome: p.livingCost * 12,
+    spouseTakehome: 0,
+    salaryGrowth: p.inflation,
+  });
+  if (coastAge !== null && coastAge <= 65) {
+    return { icon: '🦅', name: 'Coast FIRE型',
+      desc: `今後いっさい貯蓄を増やさなくても、いまの資産の複利成長だけで${coastAge}歳までにFIREできる計算です。すでに複利が味方についています。` };
+  }
+  if (fire && p.fireCost >= 35) {
+    return { icon: '🐋', name: 'Fat FIRE型',
+      desc: `FIRE後も月${p.fireCost}万円のゆとりある暮らしを狙うプラン。必要資産は大きいものの、生活の質を落とさない戦略です。` };
+  }
+  if (fire && p.fireCost <= 15) {
+    return { icon: '🍃', name: 'Lean FIRE型',
+      desc: `FIRE後の生活費を月${p.fireCost}万円に抑えて、最短距離で自由を取りにいくスタイル。支出管理力がそのまま武器になります。` };
+  }
+  if (sideFire && p.sideIncome >= 5 && (!fire || sideFire.age <= fire.age - 5)) {
+    return { icon: '☕', name: 'Barista FIRE型',
+      desc: `月${p.sideIncome}万円の副収入と組み合わせれば、${sideFire.age}歳からのセミリタイアが視野に。完全リタイアより早く自由になれる道です。` };
+  }
+  if (fire) {
+    return { icon: '🔥', name: '王道FIRE型',
+      desc: `毎月の積立でFIREラインへ着実に向かうプラン。${fire.age}歳での完全リタイアが射程に入っています。` };
+  }
+  return { icon: '🌱', name: '土台づくり型',
+    desc: '現在の前提では80歳までのFIREはまだ見えません。まずは処方箋タブを開いて、積立ペースと生活費の見直しから始めましょう。' };
+}
+
+function updateFireDash(p, fire, sideFire) {
+  const t = diagnoseFireType(p, fire, sideFire);
+  $('#ftypeBadge').textContent = `${t.icon} あなたは ${t.name}`;
+  $('#ftypeDesc').textContent = t.desc;
+  state.ftype = `${t.icon} ${t.name}`;
+
+  const now = p.currentRisk + p.currentCash;
+  let rate = null;
+  if (fire && fire.assetsAtFire > 0) {
+    rate = Math.min(100, Math.round(now / fire.assetsAtFire * 100));
+    $('#fprogPct').textContent = rate + '%';
+    $('#fprogFill').style.width = rate + '%';
+    $('#fprogNote').textContent = rate >= 100
+      ? 'FIREに必要な資産に到達しています🎉'
+      : `FIREに必要な資産 ${fmtMan(fire.assetsAtFire)} に対して、現在 ${fmtMan(now)}`;
+  } else {
+    $('#fprogPct').textContent = '--';
+    $('#fprogFill').style.width = '0%';
+    $('#fprogNote').textContent = 'FIRE可能年齢が算出できるようになると、ここに達成率が表示されます。';
+  }
+  state.fireRate = rate;
+}
+
 /* =============== 定点観測 =============== */
 function loadCheckpoint() {
   try { return JSON.parse(localStorage.getItem('ml_checkpoint')); } catch (e) { return null; }
@@ -417,6 +479,7 @@ function saveCheckpoint() {
     fire: state.last.fire ? state.last.fire.age : null,
     side: state.last.sideFire ? state.last.sideFire.age : null,
     assets: p.currentRisk + p.currentCash,
+    rate: state.fireRate,
   };
   try { localStorage.setItem('ml_checkpoint', JSON.stringify(cp)); } catch (e) { /* プライベートモード等 */ }
   updateCheckpoint(p, state.last.fire);
@@ -450,7 +513,13 @@ function updateCheckpoint(p, fire) {
   const dA = Math.round(nowAssets - cp.assets);
   const assetTxt = dA > 0 ? `資産 <b class="up">+${fmtMan(dA)}</b>`
     : dA < 0 ? `資産 <b class="down">-${fmtMan(-dA)}</b>` : '資産 ±0';
-  el.innerHTML = `<span class="cp-title">📍 定点観測</span>前回の記録(${dateStr})との比較: ${fireTxt} ・ ${assetTxt}`;
+  let rateTxt = '';
+  if (Number.isFinite(cp.rate) && Number.isFinite(state.fireRate)) {
+    const dR = state.fireRate - cp.rate;
+    rateTxt = dR > 0 ? ` ・ 達成率 <b class="up">+${dR}pt</b>`
+      : dR < 0 ? ` ・ 達成率 <b class="down">${dR}pt</b>` : '';
+  }
+  el.innerHTML = `<span class="cp-title">📍 定点観測</span>前回の記録(${dateStr})との比較: ${fireTxt} ・ ${assetTxt}${rateTxt}`;
 }
 
 /* =============== メインチャート =============== */
@@ -1022,6 +1091,14 @@ function drawShareImage(debugNoDownload) {
   x.fillStyle = '#eef4ff';
   x.font = `bold 44px ${FONT}`;
   x.fillText('資産形成シミュレーション結果', 60, 122);
+
+  /* FIREタイプと達成率 */
+  if (state.ftype) {
+    x.fillStyle = '#fbbf24';
+    x.font = `bold 26px ${FONT}`;
+    const extra = state.ftype + (Number.isFinite(state.fireRate) ? ` ・ FIRE達成率 ${state.fireRate}%` : '');
+    x.fillText(extra, 60, 166);
+  }
 
   /* 資産カーブ(右側) */
   const cx0 = 640, cy0 = 210, cw = 490, chh = 330;

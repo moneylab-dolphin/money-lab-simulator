@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Boku&text=%E8%B3%87%E7%94%A3%E5%BD%A2%E6%88%90%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%BF&display=swap">
 <!-- ?v= はキャッシュ対策。ファイルを更新して再デプロイするときは数字を上げる -->
-<link rel="stylesheet" href="css/style.css?v=22">
+<link rel="stylesheet" href="css/style.css?v=23">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -159,6 +159,18 @@
           <div class="v">--</div>
           <div class="note">左の「リタイア想定年齢」でリタイアした場合</div>
         </div>
+      </section>
+
+      <!-- FIREタイプ診断と達成率(無料) -->
+      <section class="panel ftype-box" aria-label="FIREタイプ診断とFIRE達成率">
+        <div class="ftype-badge" id="ftypeBadge">--</div>
+        <p class="ftype-desc" id="ftypeDesc"></p>
+        <div class="fprog-head">
+          <span class="fprog-title">🏁 FIRE達成率</span>
+          <span class="fprog-pct" id="fprogPct">--</span>
+        </div>
+        <div class="fprog-meter"><div class="fill" id="fprogFill" style="width:0%"></div></div>
+        <p class="fprog-note" id="fprogNote"></p>
       </section>
 
       <!-- 定点観測(無料) -->
@@ -450,8 +462,8 @@
 </div>
 <div id="ssHint">クリックで遊べます ・ ダブルクリックか Esc で戻ります</div>
 
-<script src="js/background.js?v=22"></script>
-<script src="js/engine.js?v=22"></script>
-<script src="js/app.js?v=22"></script>
+<script src="js/background.js?v=23"></script>
+<script src="js/engine.js?v=23"></script>
+<script src="js/app.js?v=23"></script>
 </body>
 </html>

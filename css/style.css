@@ -433,6 +433,25 @@ body.unlocked .gate .gate-cover { display: none; }
 .bench-bars .bb .fillbar.tiny { color: var(--ink-1); padding-left: 6px; justify-content: flex-start; }
 .bench-src { font-size: 11px; color: var(--ink-3); margin-top: 10px; }
 
+/* --- FIREタイプ診断と達成率 --- */
+.ftype-box { padding: 14px 16px; }
+.ftype-badge {
+  display: inline-block; font-size: 13.5px; font-weight: 800; color: #06231d;
+  background: linear-gradient(120deg, #5eead4, #a7f3d0);
+  border-radius: 999px; padding: 5px 14px;
+}
+.ftype-desc { font-size: 12.5px; color: var(--ink-2); line-height: 1.75; margin-top: 9px; }
+.fprog-head { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; }
+.fprog-title { font-size: 12.5px; font-weight: 800; color: var(--ink-1); }
+.fprog-pct { font-size: 20px; font-weight: 800; color: var(--teal); }
+.fprog-meter { height: 12px; border-radius: 7px; background: rgba(148, 183, 255, .10); overflow: hidden; margin-top: 8px; }
+.fprog-meter .fill {
+  height: 100%; border-radius: 7px;
+  background: linear-gradient(90deg, #0ea5a0, #5eead4);
+  transition: width .5s cubic-bezier(.2, .8, .2, 1);
+}
+.fprog-note { font-size: 11.5px; color: var(--ink-3); margin-top: 8px; }
+
 /* --- 定点観測 --- */
 .cp-box {
   display: flex; align-items: center; justify-content: space-between;
