@@ -330,6 +330,9 @@ function recalc() {
     lifeStat.className = 'stat good';
   }
 
+  updateLevers(p, fire);
+  updateCheckpoint(p, fire);
+
   state.goalDirty = true;
   if (chartsReady) {
     updateMainChart(p, mainSim);
@@ -348,6 +351,106 @@ function setStat(sel, val, unit, cls, fallback) {
   const el = $(sel);
   $('.v', el).innerHTML = val !== null ? `${val}<span class="unit">${unit}</span>` : (fallback || '--');
   el.className = 'stat ' + (cls || '');
+}
+
+/* =============== あと1万円レバー =============== */
+function fireAgeWith(p, patch) {
+  const f = findFireAge({ ...p, ...patch }, false);
+  return f ? f.age : null;
+}
+
+function leverEffect(base, a2) {
+  if (base === null && a2 === null) return { t: '80歳まで困難のまま', cls: 'mut' };
+  if (base === null) return { t: `${a2}歳でFIRE可能に!`, cls: 'good' };
+  if (a2 === null) return { t: '--', cls: 'mut' };
+  const d = base - a2;
+  if (d <= 0) return { t: '変化なし(1年未満の短縮)', cls: 'mut' };
+  return { t: `${base}歳 → ${a2}歳(${d}年 早まる)`, cls: 'good' };
+}
+
+function updateLevers(p, fire) {
+  const base = fire ? fire.age : null;
+  const levers = [
+    { icon: '💰', label: '積立をあと1万円/月 増やす', patch: { monthlyInvest: p.monthlyInvest + 1 } },
+    { icon: '✂️', label: '生活費を月1万円 減らす(現役・FIRE後とも)', patch: { livingCost: Math.max(0, p.livingCost - 1), fireCost: Math.max(0, p.fireCost - 1) } },
+    { icon: '📈', label: '利回りが年+1% 高いなら', patch: { annualReturn: p.annualReturn + 1 } },
+  ];
+  $('#leverRows').innerHTML = levers.map(l => {
+    const r = leverEffect(base, fireAgeWith(p, l.patch));
+    return `<div class="lever-row"><span class="lv-label">${l.icon} ${l.label}</span><span class="lv-effect ${r.cls}">${r.t}</span></div>`;
+  }).join('');
+
+  /* FIREを1年早める最小の追加積立(0.5万円刻み・上限30万円/月) */
+  const goal = $('#leverGoal');
+  if (base !== null && base > p.age) {
+    const enough = add => {
+      const a = fireAgeWith(p, { monthlyInvest: p.monthlyInvest + add });
+      return a !== null && a <= base - 1;
+    };
+    if (enough(30)) {
+      let lo = 0, hi = 30;
+      while (hi - lo > 0.5) {
+        const mid = (lo + hi) / 2;
+        if (enough(mid)) hi = mid; else lo = mid;
+      }
+      const need = Math.ceil(hi * 2) / 2;
+      goal.hidden = false;
+      goal.innerHTML = `🎯 FIREを1年早める最短ルート: 積立をあと <b>${need}万円/月</b>(合計 ${p.monthlyInvest + need}万円/月)`;
+    } else {
+      goal.hidden = true;
+    }
+  } else {
+    goal.hidden = true;
+  }
+}
+
+/* =============== 定点観測 =============== */
+function loadCheckpoint() {
+  try { return JSON.parse(localStorage.getItem('ml_checkpoint')); } catch (e) { return null; }
+}
+
+function saveCheckpoint() {
+  if (!state.last) return;
+  const p = currentP();
+  const cp = {
+    d: Date.now(),
+    fire: state.last.fire ? state.last.fire.age : null,
+    side: state.last.sideFire ? state.last.sideFire.age : null,
+    assets: p.currentRisk + p.currentCash,
+  };
+  try { localStorage.setItem('ml_checkpoint', JSON.stringify(cp)); } catch (e) { /* プライベートモード等 */ }
+  updateCheckpoint(p, state.last.fire);
+  toast('📍 記録しました。次に来たとき、今日からの変化がここに出ます');
+}
+
+function updateCheckpoint(p, fire) {
+  const el = $('#cpText');
+  const cp = loadCheckpoint();
+  if (!cp) {
+    el.innerHTML = `<span class="cp-title">📍 定点観測</span>今の結果を記録しておくと、次に来たとき「前回からどれだけ前進したか」がここに表示されます。`;
+    return;
+  }
+  const dateStr = new Date(cp.d).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' });
+  const nowFire = fire ? fire.age : null;
+  const nowAssets = p.currentRisk + p.currentCash;
+
+  let fireTxt;
+  if (cp.fire === null && nowFire === null) {
+    fireTxt = 'FIRE可能年齢: 変わらず';
+  } else if (cp.fire === null) {
+    fireTxt = `FIRE <b class="up">${nowFire}歳で可能に!</b>`;
+  } else if (nowFire === null) {
+    fireTxt = `FIRE ${cp.fire}歳 → <b class="down">80歳まで困難に</b>`;
+  } else {
+    const d = cp.fire - nowFire;
+    fireTxt = d > 0 ? `FIRE ${cp.fire}歳 → ${nowFire}歳 <b class="up">(${d}年 前進🎉)</b>`
+      : d < 0 ? `FIRE ${cp.fire}歳 → ${nowFire}歳 <b class="down">(${-d}年 後退)</b>`
+      : `FIRE ${nowFire}歳(変わらず)`;
+  }
+  const dA = Math.round(nowAssets - cp.assets);
+  const assetTxt = dA > 0 ? `資産 <b class="up">+${fmtMan(dA)}</b>`
+    : dA < 0 ? `資産 <b class="down">-${fmtMan(-dA)}</b>` : '資産 ±0';
+  el.innerHTML = `<span class="cp-title">📍 定点観測</span>前回の記録(${dateStr})との比較: ${fireTxt} ・ ${assetTxt}`;
 }
 
 /* =============== メインチャート =============== */
@@ -838,7 +941,7 @@ function diagnose(p) {
   } else {
     rx.push({ sev: 'info', icon: '🔒', key: '',
       title: 'このプランの「暴落込み成功確率」も診断できます',
-      body: 'メンバーシップの合言葉を入力すると、モンテカルロ試行に基づく成功確率の診断が処方箋に加わります。合言葉は<a href="https://note.com/dolphin415/membership" target="_blank" rel="noopener" style="color:#fbbf24">マネーラボのメンバー限定記事</a>でお知らせしています。', cta: true });
+      body: 'メンバーシップの合言葉を入力すると、モンテカルロ試行に基づく成功確率の診断が処方箋に加わります。合言葉は<a href="https://note.com/dolphin415/membership" target="_blank" rel="noopener" style="color:#fbbf24">マネーラボのメンバーシップ内の掲示板</a>でお知らせしています。', cta: true });
   }
 
   const order = { danger: 0, warn: 1, info: 2, good: 3 };
@@ -984,26 +1087,33 @@ function drawShareImage(debugNoDownload) {
 /* =============== 背景テーマ切替 =============== */
 function initBgSwitch() {
   const menu = $('#bgSwitch .bg-menu');
+  const btn = $('#bgSwitchBtn');
   const mark = () => {
     const cur = (window.getBgTheme && getBgTheme()) || 'space';
     $$('#bgSwitch .bg-menu button').forEach(b => b.classList.toggle('on', b.dataset.bg === cur));
   };
-  $('#bgSwitchBtn').addEventListener('click', () => { menu.hidden = !menu.hidden; mark(); });
+  const setMenu = open => {
+    menu.hidden = !open;
+    btn.textContent = open ? '✕' : '🎨';
+    if (open) mark();
+  };
+  btn.addEventListener('click', () => setMenu(menu.hidden));
   $$('#bgSwitch .bg-menu button[data-bg]').forEach(b => {
     b.addEventListener('click', () => {
       if (window.setBgTheme) setBgTheme(b.dataset.bg);
-      mark();
-      menu.hidden = true;
+      setMenu(false);
       toast(b.textContent.trim() + ' に切り替えました');
     });
   });
   $('#ssBtn').addEventListener('click', () => {
-    menu.hidden = true;
+    setMenu(false);
     enterScreensaver();
   });
-  document.addEventListener('click', e => {
-    if (!e.target.closest('#bgSwitch')) menu.hidden = true;
+  // iOS Safariは非インタラクティブ要素へのタップでclickを発火しないため pointerdown で閉じる
+  document.addEventListener('pointerdown', e => {
+    if (!e.target.closest('#bgSwitch')) setMenu(false);
   });
+  window.addEventListener('scroll', () => { if (!menu.hidden) setMenu(false); }, { passive: true });
 }
 
 /* =============== スクリーンセーバー =============== */
@@ -1135,6 +1245,7 @@ function init() {
     if (!state.last) return;
     drawShareImage();
   });
+  $('#cpBtn').addEventListener('click', saveCheckpoint);
   $('#passSubmit').addEventListener('click', tryUnlock);
   $('#passInput').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); tryUnlock(); } });
 

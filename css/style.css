@@ -409,6 +409,49 @@ body.unlocked .gate .gate-cover { display: none; }
 .bench-bars .bb .fillbar.tiny { color: var(--ink-1); padding-left: 6px; justify-content: flex-start; }
 .bench-src { font-size: 11px; color: var(--ink-3); margin-top: 10px; }
 
+/* --- 定点観測 --- */
+.cp-box {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; padding: 12px 16px;
+}
+.cp-text { font-size: 12.5px; color: var(--ink-2); line-height: 1.7; min-width: 0; }
+.cp-title { font-weight: 800; color: var(--ink-1); margin-right: 10px; white-space: nowrap; }
+.cp-text b.up { color: var(--teal); font-weight: 800; }
+.cp-text b.down { color: var(--danger); font-weight: 800; }
+#cpBtn {
+  font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer;
+  color: var(--ink-2); background: var(--surface);
+  border: 1px solid var(--border); border-radius: 999px;
+  padding: 7px 14px; white-space: nowrap; transition: all .18s;
+}
+#cpBtn:hover { color: #06231d; background: var(--teal); border-color: var(--teal); }
+
+/* --- あと1万円レバー --- */
+.lever-box { padding: 14px 16px; }
+.lever-head { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.lever-title { font-weight: 800; font-size: 14px; color: var(--ink-1); }
+.lever-sub { font-size: 11.5px; color: var(--ink-3); }
+.lever-rows { display: grid; gap: 7px; margin-top: 11px; }
+.lever-row {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 12px;
+  font-size: 12.5px; color: var(--ink-2);
+  border-bottom: 1px dashed rgba(148, 183, 255, .10); padding-bottom: 7px;
+}
+.lever-row:last-child { border-bottom: none; padding-bottom: 0; }
+.lever-row .lv-effect { font-weight: 700; white-space: nowrap; }
+.lever-row .lv-effect.good { color: var(--teal); }
+.lever-row .lv-effect.mut { color: var(--ink-3); font-weight: 600; }
+.lever-goal {
+  margin-top: 11px; font-size: 12.5px; color: var(--ink-2);
+  background: rgba(94, 234, 212, .07); border: 1px solid rgba(94, 234, 212, .18);
+  border-radius: 10px; padding: 8px 12px;
+}
+.lever-goal b { color: var(--teal); font-weight: 800; }
+@media (max-width: 640px) {
+  .lever-row { flex-direction: column; gap: 2px; }
+  .lever-row .lv-effect { white-space: normal; }
+}
+
 /* --- 背景テーマ切替 --- */
 #bgSwitch { position: fixed; right: 18px; bottom: 18px; z-index: 40;
   display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
@@ -418,6 +461,7 @@ body.unlocked .gate .gate-cover { display: none; }
   backdrop-filter: blur(12px); box-shadow: var(--shadow);
 }
 #bgSwitchBtn:hover { transform: scale(1.08); }
+#bgSwitch .bg-menu[hidden] { display: none; }
 #bgSwitch .bg-menu {
   display: grid; gap: 1px; padding: 5px;
   background: rgba(11, 19, 34, .92); border: 1px solid var(--border);
@@ -430,6 +474,12 @@ body.unlocked .gate .gate-cover { display: none; }
 }
 #bgSwitch .bg-menu button:hover { background: var(--surface-hi); color: var(--ink-1); }
 #bgSwitch .bg-menu button.on { color: #06231d; background: var(--teal); }
+@media (max-width: 640px) {
+  #bgSwitch { right: 12px; bottom: 12px; gap: 8px; }
+  #bgSwitchBtn { width: 38px; height: 38px; font-size: 16px; }
+  #bgSwitch .bg-menu { padding: 4px; }
+  #bgSwitch .bg-menu button { font-size: 11px; padding: 5px 10px; }
+}
 
 /* --- 入会導線 --- */
 .join-badge {
