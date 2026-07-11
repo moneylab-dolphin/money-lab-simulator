@@ -20,7 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Boku&text=%E8%B3%87%E7%94%A3%E5%BD%A2%E6%88%90%E3%82%B7%E3%83%9F%E3%83%A5%E3%83%AC%E3%83%BC%E3%82%BF&display=swap">
 <!-- ?v= はキャッシュ対策。ファイルを更新して再デプロイするときは数字を上げる -->
-<link rel="stylesheet" href="css/style.css?v=20">
+<link rel="stylesheet" href="css/style.css?v=21">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 <body>
@@ -154,6 +154,22 @@
           <div class="v">--</div>
           <div class="note">左の「リタイア想定年齢」でリタイアした場合</div>
         </div>
+      </section>
+
+      <!-- 定点観測(無料) -->
+      <section class="panel cp-box" aria-label="定点観測">
+        <div class="cp-text" id="cpText">--</div>
+        <button id="cpBtn" title="今の結果を保存して、次に来たときの変化を表示します">📍 今日の結果を記録</button>
+      </section>
+
+      <!-- あと1万円レバー(無料) -->
+      <section class="panel lever-box" aria-label="あと1万円レバー">
+        <div class="lever-head">
+          <span class="lever-title">🔧 あと1万円レバー</span>
+          <span class="lever-sub">小さな一手で、FIREはいつまで縮むか</span>
+        </div>
+        <div class="lever-rows" id="leverRows"></div>
+        <p class="lever-goal" id="leverGoal" hidden></p>
       </section>
 
       <nav class="tabs" role="tablist">
@@ -429,8 +445,8 @@
 </div>
 <div id="ssHint">クリックで遊べます ・ ダブルクリックか Esc で戻ります</div>
 
-<script src="js/background.js?v=20"></script>
-<script src="js/engine.js?v=20"></script>
-<script src="js/app.js?v=20"></script>
+<script src="js/background.js?v=21"></script>
+<script src="js/engine.js?v=21"></script>
+<script src="js/app.js?v=21"></script>
 </body>
 </html>
