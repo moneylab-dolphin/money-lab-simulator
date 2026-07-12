@@ -5,7 +5,7 @@
    オンライン時は常に最新を取得しつつキャッシュを更新、
    オフライン時はキャッシュから動く(PWAオフライン対応)。
    ============================================================= */
-const CACHE = 'moneylab-sim-v2';
+const CACHE = 'moneylab-sim-v3';
 const PRECACHE = [
   './',
   './index.html',
