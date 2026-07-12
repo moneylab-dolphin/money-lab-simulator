@@ -624,6 +624,7 @@ footer {
   font-size: 11.5px; color: var(--ink-3); line-height: 1.9;
 }
 footer .brand { color: var(--ink-2); font-weight: 700; margin-bottom: 6px; }
+footer .copyright { margin-top: 10px; color: var(--ink-3); opacity: .85; }
 
 /* --- スクリーンセーバー --- */
 body.screensaver .wrap,
